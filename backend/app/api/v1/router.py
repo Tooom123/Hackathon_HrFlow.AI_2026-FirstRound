@@ -1,6 +1,7 @@
 from fastapi import APIRouter
 
 from app.api.v1.endpoints.hrflow import router as hrflow_router
+from app.api.v1.endpoints.interview import router as interview_router
 
 api_router = APIRouter()
 
@@ -11,3 +12,4 @@ def healthcheck() -> dict[str, str]:
 
 
 api_router.include_router(hrflow_router)
+api_router.include_router(interview_router)

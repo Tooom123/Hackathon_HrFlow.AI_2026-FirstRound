@@ -3,3 +3,9 @@ uvicorn[standard]
 httpx
 pydantic-settings
 python-dotenv
+websockets
+torch
+torchaudio
+chatterbox-tts
+mlx-whisper
+silero-vad

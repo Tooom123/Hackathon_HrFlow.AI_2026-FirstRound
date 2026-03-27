@@ -14,5 +14,23 @@ class Settings(BaseSettings):
     api_key: str
     user_email: str
 
+    # --- Ollama (local LLM) ---
+    ollama_base_url: str = "http://localhost:11434"
+    ollama_model: str = "llama3.2"
+    ollama_temperature: float = 0.3
+
+    # --- STT (mlx-whisper) ---
+    whisper_model: str = "mlx-community/whisper-large-v3-turbo"
+    whisper_language: str = "fr"
+
+    # --- VAD (Silero) ---
+    vad_threshold: float = 0.5
+    vad_min_silence_ms: int = 700
+    vad_min_speech_ms: int = 250
+
+    # --- TTS (Chatterbox) ---
+    tts_sample_rate: int = 24_000
+    tts_chunk_size: int = 4096
+
 
 settings = Settings()
