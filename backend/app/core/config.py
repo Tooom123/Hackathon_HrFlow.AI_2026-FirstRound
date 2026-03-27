@@ -13,6 +13,7 @@ class Settings(BaseSettings):
 
     api_key: str
     user_email: str
+    hrflow_board_key: str = ""
 
     # --- Ollama (local LLM) ---
     ollama_base_url: str = "http://localhost:11434"
