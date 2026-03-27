@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.dependencies.hrflow import get_hrflow_service
-from app.schemas.job import JobFromTextRequest, ParseTextRequest
+from app.schemas.job import AskJobRequest, JobFromTextRequest, ParseTextRequest
 from app.services.hrflow_service import HrFlowService
 
 router = APIRouter(prefix="/hrflow", tags=["hrflow"])
@@ -25,6 +25,25 @@ async def parse_job_text(
     """Parse un texte brut et retourne les champs structurés extraits (skills, locations…)."""
     try:
         return await service.parse_text(body.text, language=body.language)
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+
+
+@router.post("/jobs/ask")
+async def ask_job(
+    body: AskJobRequest,
+    service: HrFlowService = Depends(get_hrflow_service),
+) -> dict:
+    """Pose un prompt (question libre) à un job indexé sur le board."""
+    try:
+        return await service.ask_job(
+            prompt=body.prompt,
+            board_key=body.board_key,
+            job_key=body.job_key,
+            job_reference=body.job_reference,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
     except Exception as exc:
         raise HTTPException(status_code=502, detail=str(exc))
 
