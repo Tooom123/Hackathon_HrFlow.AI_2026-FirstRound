@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/main.tsx","./src/api/hrflow.ts","./src/pages/candidateinterviewpage.tsx","./src/pages/candidateuploadpage.tsx","./src/pages/recruiterapp.tsx","./src/pages/rhhomepage.tsx","./src/pages/rhjobpage.tsx","./src/pages/rhquestionspage.tsx","./src/pages/rhsessionlinkpage.tsx","./src/pages/rhsetuppage.tsx"],"errors":true,"version":"6.0.2"}

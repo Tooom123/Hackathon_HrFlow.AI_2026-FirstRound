@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { setupJobInterview, type SetupJobResponse } from '../api/hrflow'
+import StepIndicator from '../components/StepIndicator'
 
 interface Props {
   onBack: () => void
@@ -22,29 +23,6 @@ function Logo() {
   )
 }
 
-function StepIndicator({ current }: { current: 1 | 2 }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2">
-        <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
-          current === 1 ? 'bg-brand text-white' : 'bg-brand/20 text-brand'
-        }`}>1</span>
-        <span className={`text-xs font-medium transition-colors ${current === 1 ? 'text-zinc-200' : 'text-zinc-500'}`}>
-          Offre
-        </span>
-      </div>
-      <div className="h-px w-8 bg-zinc-700" />
-      <div className="flex items-center gap-2">
-        <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
-          current === 2 ? 'bg-brand text-white' : 'bg-zinc-800 text-zinc-500'
-        }`}>2</span>
-        <span className={`text-xs font-medium transition-colors ${current === 2 ? 'text-zinc-200' : 'text-zinc-500'}`}>
-          Questions
-        </span>
-      </div>
-    </div>
-  )
-}
 
 export default function RhSetupPage({ onBack, onComplete }: Props) {
   const [title, setTitle] = useState('')

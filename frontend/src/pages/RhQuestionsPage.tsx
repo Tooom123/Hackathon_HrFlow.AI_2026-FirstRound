@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { saveQuestions } from '../api/hrflow'
 import type { SetupJobResponse } from '../api/hrflow'
+import StepIndicator from '../components/StepIndicator'
 
 interface Props {
   result: SetupJobResponse
@@ -24,29 +25,6 @@ function Logo() {
   )
 }
 
-function StepIndicator({ current }: { current: 1 | 2 }) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex items-center gap-2">
-        <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
-          current === 1 ? 'bg-brand text-white' : 'bg-brand/20 text-brand'
-        }`}>1</span>
-        <span className={`text-xs font-medium transition-colors ${current === 1 ? 'text-zinc-200' : 'text-zinc-500'}`}>
-          Offre
-        </span>
-      </div>
-      <div className="h-px w-8 bg-zinc-700" />
-      <div className="flex items-center gap-2">
-        <span className={`flex h-6 w-6 items-center justify-center rounded-full text-xs font-semibold transition-colors ${
-          current === 2 ? 'bg-brand text-white' : 'bg-zinc-800 text-zinc-500'
-        }`}>2</span>
-        <span className={`text-xs font-medium transition-colors ${current === 2 ? 'text-zinc-200' : 'text-zinc-500'}`}>
-          Questions
-        </span>
-      </div>
-    </div>
-  )
-}
 
 export default function RhQuestionsPage({ result, onBack, onContinue }: Props) {
   const [questions, setQuestions] = useState<string[]>(result.questions)
@@ -209,16 +187,12 @@ export default function RhQuestionsPage({ result, onBack, onContinue }: Props) {
             </button>
             <button
               onClick={async () => {
-                console.log('[Continuer] click — job_key:', result.job_key, 'job_title:', result.job_title, 'questions:', questions.length)
                 setSaveError(null)
                 setSaving(true)
                 try {
-                  console.log('[Continuer] calling saveQuestions…')
                   await saveQuestions(result.job_key, result.job_title ?? '', questions)
-                  console.log('[Continuer] saveQuestions OK → onContinue')
                   onContinue(questions)
                 } catch (err) {
-                  console.error('[Continuer] error:', err)
                   setSaveError(err instanceof Error ? err.message : 'Erreur lors de la sauvegarde')
                 } finally {
                   setSaving(false)
