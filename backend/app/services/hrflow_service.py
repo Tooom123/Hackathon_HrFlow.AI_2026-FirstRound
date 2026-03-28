@@ -306,6 +306,81 @@ class HrFlowService:
             return response.json()
 
     # ------------------------------------------------------------------
+    # Job questions (read from metadata)
+    # ------------------------------------------------------------------
+
+    async def get_job_questions(
+        self,
+        job_key: str,
+        board_key: Optional[str] = None,
+        question_count: int = 20,
+    ) -> tuple[list[str], str]:
+        """Fetch questions for a job.
+
+        Strategy:
+        1. Try to read questions from job metadata (question_0 … question_N)
+        2. Fallback: generate questions on the fly via /job/asking
+
+        Returns:
+            (questions list, job_title)
+        """
+        resolved_board_key = board_key or settings.hrflow_board_key
+        headers = _auth_headers()
+
+        # --- Try fetching job data for metadata + title ---
+        job_title = ""
+        questions: list[str] = []
+
+        try:
+            params = {"board_key": resolved_board_key, "key": job_key}
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                response = await client.get(
+                    f"{HRFLOW_API_BASE}/job/indexing",
+                    headers=headers,
+                    params=params,
+                )
+                response.raise_for_status()
+                data = response.json()
+
+            job_data = data.get("data") or {}
+            job_title = job_data.get("name", "")
+
+            # Extract questions from metadata (question_0 … question_N)
+            metadatas = job_data.get("metadatas") or []
+            question_map: dict[int, str] = {}
+            for meta in metadatas:
+                name = meta.get("name", "")
+                if name.startswith("question_"):
+                    try:
+                        idx = int(name.split("_", 1)[1])
+                        question_map[idx] = meta.get("value", "")
+                    except (ValueError, IndexError):
+                        continue
+
+            questions = [question_map[k] for k in sorted(question_map.keys())]
+        except Exception:
+            logger.warning("[get_job_questions] Could not fetch job metadata for %s, will fallback to generation", job_key)
+
+        if questions:
+            return questions, job_title
+
+        # --- Fallback: generate questions via ask_job ---
+        logger.info("[get_job_questions] No metadata questions found, generating via ask_job")
+        prompt = (
+            f"À partir de cette offre d'emploi, génère exactement {question_count} questions "
+            f"techniques pertinentes pour évaluer un candidat lors d'un entretien. "
+            f"Réponds uniquement avec les questions, une par ligne, sans introduction ni commentaire."
+        )
+        ask_result = await self.ask_job(
+            prompt=prompt,
+            board_key=resolved_board_key,
+            job_key=job_key,
+        )
+        questions = self._extract_questions(ask_result, question_count)
+
+        return questions, job_title or f"Job {job_key}"
+
+    # ------------------------------------------------------------------
     # Profiles (candidat — ne pas modifier)
     # ------------------------------------------------------------------
 

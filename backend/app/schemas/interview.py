@@ -2,14 +2,16 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from enum import Enum
+from typing import Optional
 
 
 class SessionState(str, Enum):
-    WAITING = "waiting"
-    ASKING = "asking"
-    LISTENING = "listening"
-    PROCESSING = "processing"
-    DONE = "done"
+    WAITING = "waiting"          # Session created by recruiter, waiting for candidate
+    READY = "ready"              # Candidate joined (CV uploaded), ready to start TTS
+    ASKING = "asking"            # AI is asking a question (TTS playing)
+    LISTENING = "listening"      # Candidate is speaking (VAD active)
+    PROCESSING = "processing"   # Transcribing + evaluating
+    DONE = "done"                # Interview finished
 
 
 class WSMessageType(str, Enum):
@@ -24,8 +26,6 @@ class WSMessageType(str, Enum):
 class Question:
     id: str
     text: str
-    topic: str
-    difficulty: str  # "easy" | "medium" | "hard"
 
 
 @dataclass(frozen=True)
@@ -40,10 +40,11 @@ class Answer:
 @dataclass
 class InterviewSession:
     session_id: str
-    job_id: str
-    candidate_id: str
+    job_key: str
+    job_title: str
     questions: list[Question]
     state: SessionState = SessionState.WAITING
+    candidate_profile_reference: Optional[str] = None
     current_question_index: int = 0
     answers: list[Answer] = field(default_factory=list)
 
