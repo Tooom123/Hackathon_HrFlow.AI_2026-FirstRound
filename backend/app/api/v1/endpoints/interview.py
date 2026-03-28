@@ -44,6 +44,28 @@ _orchestrators: dict[str, SessionOrchestrator] = {}
 # ------------------------------------------------------------------
 
 
+@router.get("/sessions")
+async def list_sessions_for_job(job_key: str) -> dict:
+    """Return the most recent waiting session for a given job, if any."""
+    matches = [
+        s for s in _sessions.values()
+        if s.job_key == job_key and s.state == SessionState.WAITING
+    ]
+    if not matches:
+        return {"session": None}
+    latest = max(matches, key=lambda s: s.session_id)
+    return {
+        "session": {
+            "session_id": latest.session_id,
+            "job_key": latest.job_key,
+            "job_title": latest.job_title,
+            "state": latest.state.value,
+            "total_questions": len(latest.questions),
+            "candidate_link": f"{settings.frontend_base_url}/session/{latest.session_id}",
+        }
+    }
+
+
 @router.post("/sessions", status_code=201)
 async def create_session(
     job_key: str,

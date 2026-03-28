@@ -1,71 +1,14 @@
-import { useState } from 'react'
-import type { JobCard, SetupJobResponse } from './api/hrflow'
-import RhHomePage from './pages/RhHomePage'
-import RhSetupPage from './pages/RhSetupPage'
-import RhQuestionsPage from './pages/RhQuestionsPage'
-import RhJobPage from './pages/RhJobPage'
-
-type Step = 'home' | 'setup' | 'questions' | 'job'
-
-interface SessionState {
-  result: SetupJobResponse
-  questions: string[]
-}
+import { Routes, Route } from 'react-router-dom'
+import RecruiterApp from './pages/RecruiterApp'
+import CandidateUploadPage from './pages/CandidateUploadPage'
+import CandidateInterviewPage from './pages/CandidateInterviewPage'
 
 export default function App() {
-  const [step, setStep] = useState<Step>('home')
-  const [session, setSession] = useState<SessionState | null>(null)
-  const [recentJob, setRecentJob] = useState<JobCard | null>(null)
-  const [selectedJob, setSelectedJob] = useState<JobCard | null>(null)
-
-  if (step === 'setup') {
-    return (
-      <RhSetupPage
-        onBack={() => setStep('home')}
-        onComplete={(result) => {
-          setSession({ result, questions: result.questions })
-          setStep('questions')
-        }}
-      />
-    )
-  }
-
-  if (step === 'job' && selectedJob) {
-    return (
-      <RhJobPage
-        job={selectedJob}
-        onBack={() => setStep('home')}
-      />
-    )
-  }
-
-  if (step === 'questions' && session) {
-    return (
-      <RhQuestionsPage
-        result={session.result}
-        onBack={() => setStep('setup')}
-        onContinue={(questions) => {
-          setRecentJob({
-            key: session.result.job_key,
-            reference: session.result.job_reference,
-            name: session.result.job_title,
-            summary: session.result.job_title,
-          })
-          setSession(prev => prev ? { ...prev, questions } : null)
-          setStep('home')
-        }}
-      />
-    )
-  }
-
   return (
-    <RhHomePage
-      recentJob={recentJob}
-      onNewSession={() => { setRecentJob(null); setStep('setup') }}
-      onOpenJob={(job: JobCard) => {
-        setSelectedJob(job)
-        setStep('job')
-      }}
-    />
+    <Routes>
+      <Route path="/" element={<RecruiterApp />} />
+      <Route path="/session/:sessionId" element={<CandidateUploadPage />} />
+      <Route path="/session/:sessionId/interview" element={<CandidateInterviewPage />} />
+    </Routes>
   )
 }

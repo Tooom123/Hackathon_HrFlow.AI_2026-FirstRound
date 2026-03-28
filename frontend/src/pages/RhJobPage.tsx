@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { getProfilesForJob, scoreProfiles, type JobCard, type Profile } from '../api/hrflow'
+import { getProfilesForJob, scoreProfiles, getSessionForJob, createInterviewSession, type JobCard, type Profile } from '../api/hrflow'
 
 interface Props {
   job: JobCard
@@ -171,12 +171,54 @@ function ProfileCard({ profile, matchScore }: { profile: Profile; matchScore: nu
   )
 }
 
+type LinkState = 'idle' | 'creating' | 'ready'
+
 export default function RhJobPage({ job, onBack }: Props) {
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [total, setTotal] = useState(0)
   const [matchScores, setMatchScores] = useState<Record<string, number>>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+
+  const [linkState, setLinkState] = useState<LinkState>('idle')
+  const [candidateLink, setCandidateLink] = useState<string | null>(null)
+  const [linkError, setLinkError] = useState<string | null>(null)
+  const [copied, setCopied] = useState(false)
+
+  // Check for an existing waiting session on mount
+  useEffect(() => {
+    setLinkState('creating')
+    getSessionForJob(job.key)
+      .then(session => {
+        if (session) {
+          setCandidateLink(session.candidate_link)
+          setLinkState('ready')
+        } else {
+          setLinkState('idle')
+        }
+      })
+      .catch(() => setLinkState('idle'))
+  }, [job.key])
+
+  async function handleCreateLink() {
+    setLinkState('creating')
+    setLinkError(null)
+    try {
+      const session = await createInterviewSession(job.key)
+      setCandidateLink(session.candidate_link)
+      setLinkState('ready')
+    } catch (err) {
+      setLinkError(err instanceof Error ? err.message : 'Erreur')
+      setLinkState('idle')
+    }
+  }
+
+  function handleCopy() {
+    if (!candidateLink) return
+    navigator.clipboard.writeText(candidateLink)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   useEffect(() => {
     getProfilesForJob(job.key)
@@ -197,15 +239,42 @@ export default function RhJobPage({ job, onBack }: Props) {
       <header className="fixed inset-x-0 top-0 z-10 flex h-28 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/80 px-10 backdrop-blur-md">
         <Logo />
         <span className="text-base font-semibold text-brand hidden sm:block">Espace recruteur</span>
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm font-semibold text-zinc-300 transition-all hover:border-zinc-700 hover:text-zinc-100 active:scale-[0.99]"
-        >
-          <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
-            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          Retour
-        </button>
+        <div className="flex items-center gap-3">
+          {linkState !== 'ready' && (
+            <button
+              onClick={handleCreateLink}
+              disabled={linkState === 'creating'}
+              className="flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-zinc-950 transition-all hover:bg-brand-dim active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {linkState === 'creating' ? (
+                <>
+                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+                  </svg>
+                  Chargement…
+                </>
+              ) : (
+                <>
+                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+                    <path d="M6.5 9.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                    <path d="M9.5 6.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                  </svg>
+                  Créer un lien candidat
+                </>
+              )}
+            </button>
+          )}
+          <button
+            onClick={onBack}
+            className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm font-semibold text-zinc-300 transition-all hover:border-zinc-700 hover:text-zinc-100 active:scale-[0.99]"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Retour
+          </button>
+        </div>
       </header>
 
       <main className="flex min-h-screen items-start justify-center px-8 pb-16 pt-40">
@@ -231,6 +300,44 @@ export default function RhJobPage({ job, onBack }: Props) {
               </span>
             </div>
           </div>
+
+          {linkState === 'ready' && candidateLink && (
+            <div className="flex items-center gap-3 rounded-xl border border-brand/30 bg-brand/5 px-4 py-3">
+              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 shrink-0 text-brand">
+                <path d="M6.5 9.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                <path d="M9.5 6.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              <p className="flex-1 truncate font-mono text-sm text-zinc-300">{candidateLink}</p>
+              <button
+                onClick={handleCopy}
+                className="flex shrink-0 items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-xs font-medium text-zinc-300 transition-all hover:border-brand hover:text-brand"
+              >
+                {copied ? (
+                  <>
+                    <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5 text-brand">
+                      <path d="M3 8.5l3 3 7-7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                    Copié
+                  </>
+                ) : (
+                  <>
+                    <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
+                      <rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" strokeWidth="1.3" />
+                      <path d="M3 11V3.5A1.5 1.5 0 014.5 2H11" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+                    </svg>
+                    Copier
+                  </>
+                )}
+              </button>
+            </div>
+          )}
+
+          {linkError && (
+            <div className="flex items-start gap-3 rounded-xl border border-red-900/50 bg-red-950/30 px-4 py-3">
+              <span className="text-red-400 text-sm">⚠</span>
+              <p className="text-sm text-red-300">{linkError}</p>
+            </div>
+          )}
 
           {error && (
             <div className="flex items-start gap-3 rounded-xl border border-red-900/50 bg-red-950/30 px-4 py-3">
