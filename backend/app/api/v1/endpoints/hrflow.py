@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
+from typing import Optional
 
 from app.dependencies.hrflow import get_hrflow_service
 from app.schemas.job import AskJobRequest, JobFromTextRequest, ParseTextRequest, SaveQuestionsRequest, SetupJobRequest, SetupJobResponse
@@ -19,7 +20,7 @@ async def ping_hrflow(service: HrFlowService = Depends(get_hrflow_service)) -> d
 
 @router.get("/jobs")
 async def list_jobs(
-    board_key: str | None = Query(default=None),
+    board_key: Optional[str] = Query(default=None),
     page: int = Query(default=1, ge=1),
     limit: int = Query(default=30, ge=1, le=100),
     service: HrFlowService = Depends(get_hrflow_service),
