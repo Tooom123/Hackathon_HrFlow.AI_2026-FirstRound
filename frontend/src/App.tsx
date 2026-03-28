@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import type { SetupJobResponse } from './api/hrflow'
+import type { JobCard, SetupJobResponse } from './api/hrflow'
+import RhHomePage from './pages/RhHomePage'
 import RhSetupPage from './pages/RhSetupPage'
 import RhQuestionsPage from './pages/RhQuestionsPage'
+import RhJobPage from './pages/RhJobPage'
 
-type Step = 'setup' | 'questions'
+type Step = 'home' | 'setup' | 'questions' | 'job'
 
 interface SessionState {
   result: SetupJobResponse
@@ -11,8 +13,31 @@ interface SessionState {
 }
 
 export default function App() {
-  const [step, setStep] = useState<Step>('setup')
+  const [step, setStep] = useState<Step>('home')
   const [session, setSession] = useState<SessionState | null>(null)
+  const [recentJob, setRecentJob] = useState<JobCard | null>(null)
+  const [selectedJob, setSelectedJob] = useState<JobCard | null>(null)
+
+  if (step === 'setup') {
+    return (
+      <RhSetupPage
+        onBack={() => setStep('home')}
+        onComplete={(result) => {
+          setSession({ result, questions: result.questions })
+          setStep('questions')
+        }}
+      />
+    )
+  }
+
+  if (step === 'job' && selectedJob) {
+    return (
+      <RhJobPage
+        job={selectedJob}
+        onBack={() => setStep('home')}
+      />
+    )
+  }
 
   if (step === 'questions' && session) {
     return (
@@ -20,18 +45,26 @@ export default function App() {
         result={session.result}
         onBack={() => setStep('setup')}
         onContinue={(questions) => {
+          setRecentJob({
+            key: session.result.job_key,
+            reference: session.result.job_reference,
+            name: session.result.job_title,
+            summary: session.result.job_title,
+          })
           setSession(prev => prev ? { ...prev, questions } : null)
-          // prochaine étape à brancher ici
+          setStep('home')
         }}
       />
     )
   }
 
   return (
-    <RhSetupPage
-      onComplete={(result) => {
-        setSession({ result, questions: result.questions })
-        setStep('questions')
+    <RhHomePage
+      recentJob={recentJob}
+      onNewSession={() => { setRecentJob(null); setStep('setup') }}
+      onOpenJob={(job: JobCard) => {
+        setSelectedJob(job)
+        setStep('job')
       }}
     />
   )

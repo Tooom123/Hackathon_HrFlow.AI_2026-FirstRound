@@ -88,11 +88,13 @@ class HrFlowService:
 
         # 2. Build job payload (flat, board_key at root — format HrFlow SDK)
         job_ref = reference or f"job-{uuid.uuid4().hex[:8]}"
+        summary = self._extract_summary(text)
         payload = {
             "board_key": resolved_board_key,
             "key": str(uuid.uuid4()),
             "reference": job_ref,
             "name": title,
+            "summary": summary,
             "location": loc,
             "sections": [{"name": "description", "title": "Description du poste", "description": text}],
             "skills": skills,
@@ -106,6 +108,31 @@ class HrFlowService:
                 json=payload,
             )
             response.raise_for_status()
+            return response.json()
+
+    async def list_jobs(
+        self,
+        board_key: Optional[str] = None,
+        page: int = 1,
+        limit: int = 30,
+    ) -> dict:
+        """Return jobs indexed on a board (GET /jobs/searching)."""
+        resolved_board_key = board_key or settings.hrflow_board_key
+        if not resolved_board_key:
+            raise ValueError("board_key requis")
+        params = {
+            "board_keys": json.dumps([resolved_board_key]),
+            "page": page,
+            "limit": limit,
+        }
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            response = await client.get(
+                f"{HRFLOW_API_BASE}/jobs/searching",
+                headers=_auth_headers(),
+                params=params,
+            )
+            if not response.is_success:
+                raise ValueError(f"HrFlow {response.status_code}: {response.text}")
             return response.json()
 
     async def ask_job(
@@ -172,6 +199,26 @@ class HrFlowService:
         logger.info("[setup] %d questions extraites", len(questions))
 
         return {"job_key": job_key, "job_reference": job_reference, "job_title": title, "questions": questions}
+
+    def _extract_summary(self, text: str, max_len: int = 300) -> str:
+        """Extract 2-3 informative sentences from the raw job text as a summary."""
+        clean = " ".join(text.split())
+        sentences = re.split(r"(?<=[.!?])\s+", clean)
+        summary = ""
+        for sentence in sentences:
+            if len(sentence) < 25:
+                continue
+            candidate = (summary + " " + sentence).strip() if summary else sentence
+            if len(candidate) > max_len:
+                if not summary:
+                    # First sentence already too long — truncate at word boundary
+                    summary = candidate[:max_len].rsplit(" ", 1)[0] + "…"
+                break
+            summary = candidate
+            # Stop after collecting enough content
+            if len(summary) >= 150:
+                break
+        return summary or clean[:max_len].rsplit(" ", 1)[0] + "…"
 
     def _extract_questions(self, ask_result: dict, expected: int) -> list[str]:
         raw_data = ask_result.get("data") if isinstance(ask_result, dict) else None
@@ -270,9 +317,14 @@ class HrFlowService:
         limit: int = 30,
     ) -> dict:
         """Return profiles linked to a job by filtering on the job_key tag."""
+        resolved_source_key = source_key or settings.hrflow_source_key
+        if not resolved_source_key:
+            logger.warning("[get_profiles_for_job] HRFLOW_SOURCE_KEY non configuré — retour liste vide")
+            return {"code": 200, "data": {"profiles": []}, "meta": {"page": page, "count": 0, "total": 0}}
+
         headers = {"X-API-KEY": settings.api_key, "X-USER-EMAIL": settings.user_email}
         params = {
-            "source_keys": json.dumps([source_key or settings.hrflow_source_key]),
+            "source_keys": json.dumps([resolved_source_key]),
             "page": page,
             "limit": 100,
         }
