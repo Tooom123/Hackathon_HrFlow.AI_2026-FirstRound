@@ -20,7 +20,13 @@ export interface JobCard {
   name: string
   summary?: string
   location?: { text?: string }
-  skills?: { name: string }[]
+  skills?: { name: string; type?: string }[]
+  languages?: { name: string; value?: string }[]
+  sections?: { name: string; title?: string; description?: string }[]
+  tags?: { name: string; value?: string }[]
+  ranges_float?: { name: string; value_min?: number; value_max?: number; unit?: string }[]
+  ranges_date?: { name: string; value_min?: string; value_max?: string }[]
+  metadatas?: { name: string; value: string }[]
   created_at?: string
   updated_at?: string
 }

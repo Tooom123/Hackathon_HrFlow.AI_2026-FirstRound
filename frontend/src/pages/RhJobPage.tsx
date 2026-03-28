@@ -299,25 +299,144 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
       <main className="flex min-h-screen items-start justify-center px-8 pb-16 pt-40">
         <div className="w-full max-w-6xl space-y-6">
 
-          <div className="space-y-1">
-            <h1 className="text-2xl font-bold tracking-tight text-zinc-50">{job.name}</h1>
-            {job.summary && job.summary !== job.name && (
-              <p className="text-sm text-zinc-500 max-w-2xl">{job.summary}</p>
-            )}
-            <div className="flex items-center gap-3 pt-1">
-              {job.location?.text && (
-                <span className="flex items-center gap-1 text-xs text-zinc-600">
-                  <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3">
-                    <path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" strokeWidth="1.3" />
-                    <circle cx="8" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.3" />
-                  </svg>
-                  {job.location.text}
+          <div className="rounded-2xl border border-zinc-800 p-6 space-y-5"
+            style={{ background: 'linear-gradient(135deg, rgba(39,39,42,0.7) 0%, rgba(24,24,27,0.85) 100%)' }}>
+
+            {/* Title + meta */}
+            <div className="space-y-2">
+              <h1 className="text-2xl font-bold tracking-tight text-zinc-50">{job.name}</h1>
+              <div className="flex flex-wrap items-center gap-2">
+                {job.location?.text && (
+                  <span className="flex items-center gap-1 text-xs text-zinc-500">
+                    <svg viewBox="0 0 16 16" fill="none" className="h-3 w-3 shrink-0">
+                      <path d="M8 1.5A4.5 4.5 0 0 1 12.5 6c0 3-4.5 8.5-4.5 8.5S3.5 9 3.5 6A4.5 4.5 0 0 1 8 1.5Z" stroke="currentColor" strokeWidth="1.3" />
+                      <circle cx="8" cy="6" r="1.5" stroke="currentColor" strokeWidth="1.3" />
+                    </svg>
+                    {job.location.text}
+                  </span>
+                )}
+                {job.created_at && (
+                  <span className="text-xs text-zinc-600">
+                    Créé le {new Date(job.created_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short', year: 'numeric' })}
+                  </span>
+                )}
+                <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
+                  {loading ? '…' : `${total} candidat${total !== 1 ? 's' : ''}`}
                 </span>
-              )}
-              <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
-                {loading ? '…' : `${total} candidat${total !== 1 ? 's' : ''}`}
-              </span>
+              </div>
             </div>
+
+            {/* Summary */}
+            {job.summary && job.summary !== job.name && (
+              <p className="text-sm leading-relaxed text-zinc-400 max-w-3xl">{job.summary}</p>
+            )}
+
+            {/* Tags (contract type, remote, etc.) */}
+            {job.tags && job.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {job.tags.map((t, i) => (
+                  <span key={i} className="rounded-lg border border-zinc-700 bg-zinc-800/60 px-2.5 py-1 text-xs text-zinc-300">
+                    <span className="text-zinc-500">{t.name} · </span>{t.value}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Salary range */}
+            {job.ranges_float && job.ranges_float.length > 0 && (
+              <div className="flex flex-wrap gap-3">
+                {job.ranges_float.map((r, i) => (
+                  <div key={i} className="flex items-center gap-1.5 rounded-lg border border-zinc-700 bg-zinc-800/40 px-3 py-1.5">
+                    <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5 text-zinc-500 shrink-0">
+                      <circle cx="8" cy="8" r="6" stroke="currentColor" strokeWidth="1.3" />
+                      <path d="M8 5v6M6 6.5h3a1 1 0 0 1 0 2H7a1 1 0 0 0 0 2h3" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" />
+                    </svg>
+                    <span className="text-xs text-zinc-400 capitalize">{r.name}</span>
+                    <span className="text-xs font-semibold text-zinc-200">
+                      {r.value_min !== undefined && r.value_max !== undefined
+                        ? `${r.value_min.toLocaleString('fr-FR')} – ${r.value_max.toLocaleString('fr-FR')}${r.unit ? ` ${r.unit}` : ''}`
+                        : r.value_min !== undefined
+                        ? `≥ ${r.value_min.toLocaleString('fr-FR')}${r.unit ? ` ${r.unit}` : ''}`
+                        : `≤ ${r.value_max?.toLocaleString('fr-FR')}${r.unit ? ` ${r.unit}` : ''}`}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              {/* Skills */}
+              {job.skills && job.skills.length > 0 && (() => {
+                const hard = job.skills!.filter(s => s.type === 'hard')
+                const soft = job.skills!.filter(s => s.type === 'soft')
+                const other = job.skills!.filter(s => !s.type || (s.type !== 'hard' && s.type !== 'soft'))
+                return (
+                  <div className="space-y-2">
+                    <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">Compétences</p>
+                    {[{ label: 'Techniques', items: hard }, { label: 'Soft skills', items: soft }, { label: 'Autres', items: other }]
+                      .filter(g => g.items.length > 0)
+                      .map(g => (
+                        <div key={g.label}>
+                          <p className="mb-1 text-[10px] font-medium text-zinc-600">{g.label}</p>
+                          <div className="flex flex-wrap gap-1">
+                            {g.items.map(s => (
+                              <span key={s.name} className="rounded-md bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-400">{s.name}</span>
+                            ))}
+                          </div>
+                        </div>
+                      ))}
+                  </div>
+                )
+              })()}
+
+              {/* Languages */}
+              {job.languages && job.languages.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">Langues</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {job.languages.map((l, i) => (
+                      <span key={i} className="rounded-md border border-zinc-700 bg-zinc-800/50 px-2.5 py-1 text-xs text-zinc-300">
+                        {l.name}{l.value ? ` · ${l.value}` : ''}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Sections (description) */}
+            {job.sections && job.sections.filter(s => s.description).length > 0 && (
+              <div className="space-y-3">
+                <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">Description</p>
+                {job.sections.filter(s => s.description).map((s, i) => (
+                  <div key={i} className="space-y-1">
+                    {s.title && <p className="text-xs font-semibold text-zinc-400">{s.title}</p>}
+                    <p className="text-sm leading-relaxed text-zinc-500 whitespace-pre-line">{s.description}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {/* Interview questions stored as metadatas */}
+            {(() => {
+              const questions = (job.metadatas ?? [])
+                .filter(m => /^question_\d+$/.test(m.name))
+                .sort((a, b) => parseInt(a.name.split('_')[1]) - parseInt(b.name.split('_')[1]))
+              if (!questions.length) return null
+              return (
+                <div className="space-y-2">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">Questions d'entretien</p>
+                  <ol className="space-y-1.5 list-none">
+                    {questions.map((q, i) => (
+                      <li key={i} className="flex items-start gap-2">
+                        <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand/10 text-[10px] font-bold text-brand">{i + 1}</span>
+                        <span className="text-sm text-zinc-400">{q.value}</span>
+                      </li>
+                    ))}
+                  </ol>
+                </div>
+              )
+            })()}
           </div>
 
           {linkState === 'ready' && candidateLink && (

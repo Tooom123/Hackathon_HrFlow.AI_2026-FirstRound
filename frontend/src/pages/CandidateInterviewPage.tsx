@@ -173,7 +173,6 @@ export default function CandidateInterviewPage() {
   const [messages, setMessages] = useState<ChatMessage[]>([])
   const [isAudioPlaying, setIsAudioPlaying] = useState(false)
   const [liveTranscript, setLiveTranscript] = useState<string | null>(null)
-  const [globalScore, setGlobalScore] = useState<number | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const wsRef = useRef<WebSocket | null>(null)
@@ -342,9 +341,6 @@ export default function CandidateInterviewPage() {
             stopMicrophone()
           }
 
-          if (newState === 'done' && msg.global_score != null) {
-            setGlobalScore(msg.global_score)
-          }
           break
         }
         case 'question_text':
@@ -463,12 +459,6 @@ export default function CandidateInterviewPage() {
               <p className="text-sm text-zinc-400">
                 Merci pour votre participation. Le recruteur recevra vos résultats.
               </p>
-              {globalScore != null && (
-                <div className="inline-flex items-center gap-2 rounded-full border border-brand/30 bg-brand/10 px-4 py-2">
-                  <span className="text-sm font-medium text-zinc-300">Score global</span>
-                  <span className="text-lg font-bold text-brand">{globalScore.toFixed(1)}/10</span>
-                </div>
-              )}
             </div>
           )}
 
