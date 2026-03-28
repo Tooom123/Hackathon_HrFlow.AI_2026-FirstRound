@@ -34,6 +34,22 @@ async def list_jobs(
         raise HTTPException(status_code=502, detail=str(exc))
 
 
+@router.post("/jobs/{job_key}/scoring")
+async def score_profiles(
+    job_key: str,
+    body: dict,
+    board_key: Optional[str] = Query(default=None),
+    service: HrFlowService = Depends(get_hrflow_service),
+) -> dict:
+    """Calcule un score de matching skills (0–100) par profil vs le job."""
+    profiles = body.get("profiles", [])
+    try:
+        scores = await service.score_profiles_for_job(job_key=job_key, profiles=profiles, board_key=board_key)
+        return {"scores": scores}
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
+
+
 @router.post("/jobs/parse")
 async def parse_job_text(
     body: ParseTextRequest,

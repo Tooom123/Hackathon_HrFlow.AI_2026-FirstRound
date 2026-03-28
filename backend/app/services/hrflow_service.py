@@ -381,6 +381,85 @@ class HrFlowService:
         return questions, job_title or f"Job {job_key}"
 
     # ------------------------------------------------------------------
+    # Scoring
+    # ------------------------------------------------------------------
+
+    async def score_profiles_for_job(
+        self,
+        job_key: str,
+        profiles: list[dict],
+        board_key: Optional[str] = None,
+    ) -> dict[str, float]:
+        """Compute a skill-overlap matching score (0–100) for each profile vs the job.
+
+        Strategy: fetch job skills from HrFlow, then for each profile compute
+        Jaccard similarity between profile skills and job skills (case-insensitive).
+        """
+        resolved_board_key = board_key or settings.hrflow_board_key
+        if not resolved_board_key or not profiles:
+            return {}
+
+        # Fetch job skills
+        try:
+            async with httpx.AsyncClient(timeout=15.0) as client:
+                resp = await client.get(
+                    f"{HRFLOW_API_BASE}/job/indexing",
+                    headers=_auth_headers(),
+                    params={"board_key": resolved_board_key, "key": job_key},
+                )
+                resp.raise_for_status()
+                job_data = resp.json().get("data") or {}
+        except Exception as exc:
+            logger.warning("[scoring] Could not fetch job: %s", exc)
+            return {}
+
+        job_skills = {
+            s["name"].lower()
+            for s in (job_data.get("skills") or [])
+            if isinstance(s, dict) and s.get("name")
+        }
+        logger.info("[scoring] job_skills(%d)=%s", len(job_skills), list(job_skills)[:10])
+
+        # Fallback: build keyword set from job description text when no skills indexed
+        job_text_lower = ""
+        if not job_skills:
+            sections = job_data.get("sections") or []
+            job_text_lower = " ".join(
+                (s.get("description") or "") for s in sections if isinstance(s, dict)
+            ).lower()
+            logger.info("[scoring] fallback to text matching, text_len=%d", len(job_text_lower))
+
+        result: dict[str, float] = {}
+        for profile in profiles:
+            key = profile.get("key")
+            if not key:
+                continue
+            profile_skills = [
+                s["name"].lower()
+                for s in (profile.get("skills") or [])
+                if isinstance(s, dict) and s.get("name")
+            ]
+            if not profile_skills:
+                result[key] = 0.0
+                continue
+
+            if job_skills:
+                profile_set = set(profile_skills)
+                intersection = len(job_skills & profile_set)
+                union = len(job_skills | profile_set)
+                jaccard = intersection / union if union else 0.0
+                score = round(min(jaccard * 2.5, 1.0) * 100, 1)
+            else:
+                # Text fallback: count how many profile skills appear in job description
+                hits = sum(1 for skill in profile_skills if skill in job_text_lower)
+                score = round(min(hits / max(len(profile_skills), 1), 1.0) * 100, 1)
+
+            logger.info("[scoring] profile=%s skills=%d score=%.1f", key[:8], len(profile_skills), score)
+            result[key] = score
+
+        return result
+
+    # ------------------------------------------------------------------
     # Interview results → profile metadata
     # ------------------------------------------------------------------
 
