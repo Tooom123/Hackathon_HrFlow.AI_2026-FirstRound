@@ -31,6 +31,7 @@ class Question:
 @dataclass(frozen=True)
 class Answer:
     question_id: str
+    asked_text: str
     transcript: str
     audio_duration_s: float
     llm_evaluation: str

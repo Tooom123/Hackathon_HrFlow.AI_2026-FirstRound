@@ -46,6 +46,7 @@ class SessionOrchestrator:
     llm: LLMService
     job_context: str = ""
     _follow_up_used: bool = field(default=False, init=False)
+    _last_asked_text: str | None = field(default=None, init=False)
 
     async def start(self) -> SessionEvent:
         """Initialize session: generate intro audio, transition to ASKING."""
@@ -56,6 +57,7 @@ class SessionOrchestrator:
 
         intro_text = await self.llm.generate_introduction(self.job_context)
         full_text = f"{intro_text} Première question : {question.text}"
+        self._last_asked_text = question.text
 
         audio = await self.tts.synthesize(full_text)
         self.session.state = SessionState.ASKING
@@ -123,6 +125,7 @@ class SessionOrchestrator:
 
         answer = Answer(
             question_id=question.id,
+            asked_text=self._last_asked_text or question.text,
             transcript=transcript,
             audio_duration_s=audio_duration_s,
             llm_evaluation=evaluation.evaluation,
@@ -211,8 +214,11 @@ class SessionOrchestrator:
         final_answers = [a for a in self.session.answers if not a.follow_up_asked] or self.session.answers
         answers_payload = [
             {
-                "question": self.session.questions[int(a.question_id)].text
-                if int(a.question_id) < len(self.session.questions) else "",
+                "question": a.asked_text
+                or (
+                    self.session.questions[int(a.question_id)].text
+                    if int(a.question_id) < len(self.session.questions) else ""
+                ),
                 "transcript": a.transcript,
                 "score": a.score,
                 "evaluation": a.llm_evaluation,
@@ -241,6 +247,7 @@ class SessionOrchestrator:
 
     async def _ask_question(self, text: str) -> SessionEvent:
         """Synthesize a question/follow-up into audio and update state."""
+        self._last_asked_text = text
         audio = await self.tts.synthesize(text)
         self.vad.reset()
         self.session.state = SessionState.ASKING
