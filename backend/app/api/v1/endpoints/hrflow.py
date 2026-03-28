@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 
 from app.dependencies.hrflow import get_hrflow_service
 from app.schemas.job import AskJobRequest, JobFromTextRequest, ParseTextRequest, SaveQuestionsRequest, SetupJobRequest, SetupJobResponse
@@ -15,6 +15,22 @@ async def ping_hrflow(service: HrFlowService = Depends(get_hrflow_service)) -> d
         return {"status": "connected", "data": data}
     except Exception as exc:
         raise HTTPException(status_code=503, detail=f"HrFlow API unreachable: {exc}")
+
+
+@router.get("/jobs")
+async def list_jobs(
+    board_key: str | None = Query(default=None),
+    page: int = Query(default=1, ge=1),
+    limit: int = Query(default=30, ge=1, le=100),
+    service: HrFlowService = Depends(get_hrflow_service),
+) -> dict:
+    """Liste les jobs indexés sur un board."""
+    try:
+        return await service.list_jobs(board_key=board_key, page=page, limit=limit)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        raise HTTPException(status_code=502, detail=str(exc))
 
 
 @router.post("/jobs/parse")
