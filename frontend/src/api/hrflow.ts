@@ -160,11 +160,10 @@ export interface JoinSessionResponse {
 }
 
 export async function joinInterviewSession(session_id: string, profile_reference: string): Promise<JoinSessionResponse> {
-  const res = await fetch(`${API_BASE}/interview/sessions/${encodeURIComponent(session_id)}/join`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ profile_reference }),
-  })
+  const res = await fetch(
+    `${API_BASE}/interview/sessions/${encodeURIComponent(session_id)}/join?profile_reference=${encodeURIComponent(profile_reference)}`,
+    { method: 'POST' },
+  )
   if (!res.ok) {
     const err = await res.json().catch(() => ({}))
     throw new Error(err.detail ?? `Erreur serveur (${res.status})`)
