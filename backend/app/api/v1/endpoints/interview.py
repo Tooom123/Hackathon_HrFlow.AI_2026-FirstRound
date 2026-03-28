@@ -268,25 +268,24 @@ async def interview_websocket(websocket: WebSocket, session_id: str) -> None:
 
 
 async def _init_orchestrator(session: InterviewSession) -> SessionOrchestrator:
-    """Build AI services and create the session orchestrator."""
+    """Build AI services and create the session orchestrator.
+
+    TTS is a shared singleton loaded at startup (heavy model).
+    VAD is per-session (stateful). STT and LLM are lightweight.
+    """
+    from app.core.model_registry import get_tts, get_vad_config
     from app.services.interview_session import SessionOrchestrator
     from app.services.llm_service import LLMConfig, LLMService
     from app.services.stt_service import STTConfig, STTService
-    from app.services.tts_service import TTSConfig, TTSService
-    from app.services.vad_service import VADConfig, VADService
+    from app.services.vad_service import VADService
 
-    vad = VADService(VADConfig(
-        threshold=settings.vad_threshold,
-        min_silence_duration_ms=settings.vad_min_silence_ms,
-        min_speech_duration_ms=settings.vad_min_speech_ms,
-    ))
+    # Per-session VAD (stateful — each session needs its own instance)
+    vad = VADService(get_vad_config())
+    await vad.load_model()
+
     stt = STTService(STTConfig(
         model_name=settings.whisper_model,
         language=settings.whisper_language,
-    ))
-    tts = TTSService(TTSConfig(
-        sample_rate=settings.tts_sample_rate,
-        chunk_size=settings.tts_chunk_size,
     ))
     llm = LLMService(LLMConfig(
         base_url=settings.ollama_base_url,
@@ -294,8 +293,8 @@ async def _init_orchestrator(session: InterviewSession) -> SessionOrchestrator:
         temperature=settings.ollama_temperature,
     ))
 
-    await vad.load_model()
-    await tts.load_model()
+    # Shared singleton — already loaded at startup
+    tts = get_tts()
 
     return SessionOrchestrator(
         session=session,
