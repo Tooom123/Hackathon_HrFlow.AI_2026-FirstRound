@@ -25,6 +25,27 @@ def _auth_headers() -> dict:
 
 class HrFlowService:
 
+    @staticmethod
+    def _sanitize_interview_transcript(transcript: str, question: str) -> str:
+        """Strip a duplicated question accidentally captured at the end of an answer."""
+        cleaned = (transcript or "").strip()
+        question_clean = (question or "").strip()
+        if not cleaned or not question_clean:
+            return cleaned
+
+        lowered_transcript = cleaned.casefold()
+        lowered_question = question_clean.casefold()
+        question_pos = lowered_transcript.rfind(lowered_question)
+        if question_pos <= 0:
+            return cleaned
+
+        suffix = cleaned[question_pos + len(question_clean):]
+        if suffix.strip(" \t\r\n.,;:!?)]}\"'"):
+            return cleaned
+
+        prefix = cleaned[:question_pos].rstrip(" \t\r\n-–—:;,.")
+        return prefix if prefix else cleaned
+
     # ------------------------------------------------------------------
     # Auth
     # ------------------------------------------------------------------
@@ -280,7 +301,7 @@ class HrFlowService:
             job_data = (get_resp.json().get("data") or {})
 
         # 2. Build metadata list
-        metadata = [{"name": f"question_{i + 1}", "value": q} for i, q in enumerate(questions)]
+        metadata = [{"name": f"question_{i}", "value": q} for i, q in enumerate(questions)]
 
         # 3. PUT full job object with updated metadata
         payload = {
@@ -509,12 +530,23 @@ class HrFlowService:
         info = profile_data.get("info") or {}
         logger.info("[save_interview] profile_key=%r info_keys=%s", profile_key, list(info.keys()))
 
-        # 2. Build metadata list with answers + scores
-        metadatas: list[dict] = []
+        # 2. Keep non-interview metadatas and refresh only the interview keys.
+        existing_metadatas = profile_data.get("metadatas") or []
+        metadatas: list[dict] = [
+            metadata
+            for metadata in existing_metadatas
+            if not re.match(r"^interview_(question|answer|score|evaluation)_\d+$", metadata.get("name", ""))
+            and metadata.get("name") not in {"interview_global_score", "interview_completed_at"}
+        ]
         for i, answer in enumerate(answers):
+            question_text = answer.get("question", "")
+            transcript = self._sanitize_interview_transcript(
+                answer.get("transcript", ""),
+                question_text,
+            )
             metadatas += [
-                {"name": f"interview_question_{i}", "value": answer.get("question", "")},
-                {"name": f"interview_answer_{i}", "value": answer.get("transcript", "")},
+                {"name": f"interview_question_{i}", "value": question_text},
+                {"name": f"interview_answer_{i}", "value": transcript},
                 {"name": f"interview_score_{i}", "value": str(answer.get("score", 0))},
                 {"name": f"interview_evaluation_{i}", "value": answer.get("evaluation", "")},
             ]
