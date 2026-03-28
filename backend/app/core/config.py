@@ -16,6 +16,9 @@ class Settings(BaseSettings):
     hrflow_board_key: str = ""
     hrflow_source_key: str = ""
 
+    # --- Frontend ---
+    frontend_base_url: str = "http://localhost:5173"
+
     # --- Ollama (local LLM) ---
     ollama_base_url: str = "http://localhost:11434"
     ollama_model: str = "llama3.2"

@@ -83,6 +83,41 @@ class SessionOrchestrator:
 
         return await self._process_speech_segment(audio_segment, duration_s)
 
+    async def handle_mock_answer(self, text: str) -> SessionEvent:
+        """Bypass VAD/STT and directly process a text answer (test mode only)."""
+        self.session.state = SessionState.PROCESSING
+        logger.info("Mock answer [Q%d]: %s", self.session.current_question_index, text)
+
+        question = self.session.current_question
+        if question is None:
+            self.session.state = SessionState.DONE
+            return SessionEvent(new_state=SessionState.DONE)
+
+        evaluation = await self.llm.evaluate_answer(
+            question_text=question.text,
+            candidate_answer=text,
+            job_context=self.job_context,
+        )
+
+        answer = Answer(
+            question_id=question.id,
+            transcript=text,
+            audio_duration_s=0.0,
+            llm_evaluation=evaluation.evaluation,
+            follow_up_asked=(evaluation.decision == LLMDecision.FOLLOW_UP),
+        )
+        self.session.answers.append(answer)
+
+        if (
+            evaluation.decision == LLMDecision.FOLLOW_UP
+            and not self._follow_up_used
+            and evaluation.follow_up_text
+        ):
+            self._follow_up_used = True
+            return await self._ask_question(evaluation.follow_up_text)
+
+        return await self._advance_and_ask()
+
     async def _process_speech_segment(
         self, audio: bytes, duration_s: float
     ) -> SessionEvent:
