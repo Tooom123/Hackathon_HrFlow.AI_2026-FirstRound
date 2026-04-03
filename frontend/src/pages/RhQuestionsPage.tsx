@@ -21,7 +21,6 @@ function Logo() {
   )
 }
 
-
 export default function RhQuestionsPage({ result, onBack, onContinue }: Props) {
   const [questions, setQuestions] = useState<string[]>(result.questions)
   const [newQuestion, setNewQuestion] = useState('')

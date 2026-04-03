@@ -11,8 +11,6 @@ interface ChatMessage {
   text: string
 }
 
-// ── Sub-components ──
-
 function Logo() {
   return (
     <div className="flex items-center gap-2">
@@ -45,7 +43,7 @@ function StateBadge({ state }: { state: SessionState }) {
 function ConnectingScreen() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-8 px-4">
-      {/* Pulsing logo */}
+      {}
       <div className="relative">
         <div className="absolute inset-0 animate-ping rounded-full bg-brand/20" style={{ animationDuration: '2s' }} />
         <div className="absolute -inset-4 animate-pulse rounded-full bg-brand/5" style={{ animationDuration: '3s' }} />
@@ -66,7 +64,7 @@ function ConnectingScreen() {
         </p>
       </div>
 
-      {/* Steps */}
+      {}
       <div className="space-y-3 w-full max-w-xs">
         {['Connecting to server', 'Initializing audio', 'Loading questions'].map((step, i) => (
           <div key={step} className="flex items-center gap-3 rounded-xl border border-zinc-800/60 bg-zinc-900/50 px-4 py-3"
@@ -81,7 +79,7 @@ function ConnectingScreen() {
         ))}
       </div>
 
-      {/* Disclaimer */}
+      {}
       <div className="flex items-center gap-2 rounded-lg bg-zinc-900/50 px-4 py-2.5 border border-zinc-800/40">
         <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 shrink-0 text-zinc-600">
           <path d="M8 5v3M8 10.5v.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
@@ -160,8 +158,6 @@ function ListeningIndicator() {
   )
 }
 
-// ── Main component ──
-
 export default function CandidateInterviewPage() {
   const { sessionId } = useParams<{ sessionId: string }>()
 
@@ -181,13 +177,10 @@ export default function CandidateInterviewPage() {
   const msgIdRef = useRef(0)
   const stateRef = useRef<SessionState>('connecting')
 
-  // When true, mic should start as soon as audio finishes
   const pendingMicStartRef = useRef(false)
 
-  // Keep stateRef in sync
   useEffect(() => { stateRef.current = state }, [state])
 
-  // Auto-scroll chat
   useEffect(() => {
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, state, liveTranscript])
@@ -197,7 +190,6 @@ export default function CandidateInterviewPage() {
     setMessages(prev => [...prev, { id, role, text }])
   }
 
-  // ── Audio context ──
   function getAudioContext(): AudioContext {
     if (!audioContextRef.current) {
       audioContextRef.current = new AudioContext({ sampleRate: 24000 })
@@ -205,7 +197,6 @@ export default function CandidateInterviewPage() {
     return audioContextRef.current
   }
 
-  // ── Microphone ──
   const stopMicrophone = useCallback(() => {
     pendingMicStartRef.current = false
     processorRef.current?.disconnect()
@@ -215,7 +206,7 @@ export default function CandidateInterviewPage() {
   }, [])
 
   const startMicrophone = useCallback(async () => {
-    // If audio is still playing, defer — mic will start when playback ends
+
     if (isPlayingRef.current) {
       pendingMicStartRef.current = true
       return
@@ -223,7 +214,6 @@ export default function CandidateInterviewPage() {
 
     pendingMicStartRef.current = false
 
-    // Already running
     if (processorRef.current) return
 
     try {
@@ -238,7 +228,7 @@ export default function CandidateInterviewPage() {
       processorRef.current = processor
 
       processor.onaudioprocess = (e) => {
-        // Hard guard: only send audio in listening state AND when nothing is playing
+
         if (wsRef.current?.readyState !== WebSocket.OPEN) return
         if (stateRef.current !== 'listening') return
         if (isPlayingRef.current) return
@@ -260,12 +250,10 @@ export default function CandidateInterviewPage() {
     }
   }, [stopMicrophone])
 
-  // ── Sequential audio playback queue ──
   const onPlaybackFinished = useCallback(() => {
     isPlayingRef.current = false
     setIsAudioPlaying(false)
 
-    // Audio done — if mic was waiting, start it now
     if (pendingMicStartRef.current && stateRef.current === 'listening') {
       startMicrophone()
     }
@@ -312,7 +300,6 @@ export default function CandidateInterviewPage() {
     })
   }, [playNext])
 
-  // ── WebSocket ──
   useEffect(() => {
     if (!sessionId) return
 
@@ -331,7 +318,7 @@ export default function CandidateInterviewPage() {
 
           if (newState === 'listening') {
             setLiveTranscript(null)
-            // Start mic — will defer if audio is still playing
+
             startMicrophone()
           } else if (newState === 'asking' || newState === 'processing' || newState === 'done') {
             stopMicrophone()
@@ -376,11 +363,8 @@ export default function CandidateInterviewPage() {
       stopMicrophone()
       ws.close()
     }
-  }, [sessionId]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [sessionId])
 
-  // ── Render ──
-
-  // Full-screen loading
   if (state === 'connecting' || state === 'ready') {
     return <ConnectingScreen />
   }
@@ -394,18 +378,18 @@ export default function CandidateInterviewPage() {
 
   return (
     <div className="flex min-h-screen flex-col text-zinc-50">
-      {/* Header */}
+      {}
       <header className="fixed inset-x-0 top-0 z-10 flex h-14 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/80 px-6 backdrop-blur-md">
         <Logo />
         <StateBadge state={state} />
         <div className="w-24" />
       </header>
 
-      {/* Chat area */}
+      {}
       <main className="flex-1 overflow-y-auto px-4 pb-32 pt-20">
         <div className="mx-auto w-full max-w-2xl space-y-4">
 
-          {/* Chat messages */}
+          {}
           {messages.map((msg, i) => (
             msg.role === 'ai'
               ? <AiBubble
@@ -416,10 +400,10 @@ export default function CandidateInterviewPage() {
               : <UserBubble key={msg.id} text={msg.text} />
           ))}
 
-          {/* Live listening indicator */}
+          {}
           {state === 'listening' && !isAudioPlaying && <ListeningIndicator />}
 
-          {/* Live transcript preview */}
+          {}
           {state === 'listening' && liveTranscript && (
             <div className="flex justify-end">
               <p className="max-w-[85%] rounded-2xl rounded-tr-md border border-zinc-800 bg-zinc-900/50 px-4 py-3 text-sm italic text-zinc-500">
@@ -428,7 +412,7 @@ export default function CandidateInterviewPage() {
             </div>
           )}
 
-          {/* Processing indicator */}
+          {}
           {state === 'processing' && (
             <div className="flex items-start gap-3">
               <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand/10">
@@ -443,7 +427,7 @@ export default function CandidateInterviewPage() {
             </div>
           )}
 
-          {/* Done */}
+          {}
           {state === 'done' && (
             <div className="rounded-2xl border border-brand/30 bg-brand/5 p-8 text-center space-y-4 mt-6">
               <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-brand/10">
@@ -458,7 +442,7 @@ export default function CandidateInterviewPage() {
             </div>
           )}
 
-          {/* Error */}
+          {}
           {error && state === 'error' && (
             <div className="flex items-start gap-3 rounded-xl border border-red-900/50 bg-red-950/30 px-4 py-3">
               <span className="text-red-400 text-sm mt-px">⚠</span>
@@ -470,7 +454,7 @@ export default function CandidateInterviewPage() {
         </div>
       </main>
 
-      {/* Bottom bar — mic status */}
+      {}
       {state !== 'done' && state !== 'error' && (
         <div className="fixed inset-x-0 bottom-0 border-t border-zinc-800/60 bg-zinc-950/90 backdrop-blur-md">
           <div className="mx-auto flex max-w-2xl items-center justify-center gap-3 px-4 py-4">

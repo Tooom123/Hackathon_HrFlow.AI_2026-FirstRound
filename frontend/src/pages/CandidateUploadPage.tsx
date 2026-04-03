@@ -31,7 +31,6 @@ export default function CandidateUploadPage() {
   const [dragActive, setDragActive] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // Fetch session info on mount
   useEffect(() => {
     if (!sessionId) return
     getSessionStatus(sessionId)
@@ -138,7 +137,7 @@ export default function CandidateUploadPage() {
             </p>
           </div>
 
-          {/* Email */}
+          {}
           <div className="space-y-1.5">
             <label htmlFor="candidate-email" className="block text-sm font-medium text-zinc-300">
               Email address <span className="text-zinc-600">(optional — to be contacted)</span>
@@ -153,7 +152,7 @@ export default function CandidateUploadPage() {
             />
           </div>
 
-          {/* Drop zone */}
+          {}
           <div
             onDrop={handleDrop}
             onDragOver={handleDragOver}

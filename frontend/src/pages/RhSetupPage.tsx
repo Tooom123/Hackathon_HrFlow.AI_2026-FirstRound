@@ -19,7 +19,6 @@ function Logo() {
   )
 }
 
-
 export default function RhSetupPage({ onBack, onComplete }: Props) {
   const [title, setTitle] = useState('')
   const [text, setText] = useState('')
@@ -48,19 +47,21 @@ export default function RhSetupPage({ onBack, onComplete }: Props) {
       <header className="fixed inset-x-0 top-0 z-10 flex h-14 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/80 px-6 backdrop-blur-md">
         <Logo />
         <StepIndicator current={1} />
-        <button
-          onClick={onBack}
-          className="hidden sm:flex items-center gap-1.5 text-xs text-zinc-500 transition-colors hover:text-zinc-300"
-        >
-          <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
-            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          Back
-        </button>
+        <div className="w-24" />
       </header>
 
       <main className="flex min-h-screen items-start justify-center px-4 pb-16 pt-28">
         <div className="w-full max-w-xl space-y-8">
+
+          <button
+            onClick={onBack}
+            className="fixed left-6 top-20 flex items-center gap-1.5 text-xs text-zinc-100 transition-colors hover:text-white z-20"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
+              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Back
+          </button>
 
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight text-zinc-50">

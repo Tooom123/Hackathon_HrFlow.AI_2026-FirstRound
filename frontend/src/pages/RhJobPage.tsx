@@ -57,13 +57,13 @@ function ScoreBadge({ label, value, color }: { label: string; value: number | nu
 
 function extractInterviewScore(profile: Profile): number | null {
   const metas = profile.metadatas ?? []
-  // Prefer global score if already computed
+
   const global = metas.find(m => m.name === 'interview_global_score')
   if (global) {
     const v = parseFloat(global.value)
     if (!isNaN(v)) return Math.round((v / 10) * 100)
   }
-  // Fallback: average individual scores (0–10 → %)
+
   const scores = metas
     .filter(m => /^interview_score_\d+$/.test(m.name))
     .map(m => parseFloat(m.value))
@@ -104,7 +104,7 @@ function ProfileCard({ profile, matchScore, onClick }: { profile: Profile; match
       <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-white/[0.03] to-transparent rounded-t-2xl" />
 
       <div className="relative flex gap-5">
-        {/* Left: identity + experience + skills */}
+        {}
         <div className="flex-1 min-w-0 space-y-3">
           <div className="flex items-start gap-3">
             <Avatar profile={profile} />
@@ -167,7 +167,7 @@ function ProfileCard({ profile, matchScore, onClick }: { profile: Profile; match
           )}
         </div>
 
-        {/* Right: scores */}
+        {}
         <div className="flex shrink-0 flex-row gap-2 items-center">
           <ScoreBadge label="Matching" value={matchScore} color="brand" />
           <ScoreBadge label="Entretien" value={interviewScore} color="amber" />
@@ -200,7 +200,6 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
   const [linkError, setLinkError] = useState<string | null>(null)
   const [copied, setCopied] = useState(false)
 
-  // Check for an existing waiting session on mount
   useEffect(() => {
     setLinkState('creating')
     getSessionForJob(job.key)
@@ -280,25 +279,26 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
               )}
             </button>
           )}
-          <button
-            onClick={onBack}
-            className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-5 py-3 text-sm font-semibold text-zinc-300 transition-all hover:border-zinc-700 hover:text-zinc-100 active:scale-[0.99]"
-          >
-            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
-              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Back
-          </button>
         </div>
       </header>
 
       <main className="flex min-h-screen items-start justify-center px-8 pb-16 pt-40">
         <div className="w-full max-w-6xl space-y-6">
 
+          <button
+            onClick={onBack}
+            className="fixed left-6 top-32 flex items-center gap-1.5 text-xs text-zinc-100 transition-colors hover:text-white z-20"
+          >
+            <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
+              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            Back
+          </button>
+
           <div className="rounded-2xl border border-zinc-800 p-6 space-y-5"
             style={{ background: 'linear-gradient(135deg, rgba(39,39,42,0.7) 0%, rgba(24,24,27,0.85) 100%)' }}>
 
-            {/* Title + meta */}
+            {}
             <div className="space-y-2">
               <h1 className="text-2xl font-bold tracking-tight text-zinc-50">{job.name}</h1>
               <div className="flex flex-wrap items-center gap-2">
@@ -322,12 +322,12 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
               </div>
             </div>
 
-            {/* Summary */}
+            {}
             {job.summary && job.summary !== job.name && (
               <p className="text-sm leading-relaxed text-zinc-400 max-w-3xl">{job.summary}</p>
             )}
 
-            {/* Tags (contract type, remote, etc.) */}
+            {}
             {job.tags && job.tags.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {job.tags.map((t, i) => (
@@ -338,7 +338,7 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
               </div>
             )}
 
-            {/* Salary range */}
+            {}
             {job.ranges_float && job.ranges_float.length > 0 && (
               <div className="flex flex-wrap gap-3">
                 {job.ranges_float.map((r, i) => (
@@ -361,7 +361,7 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
             )}
 
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-              {/* Skills */}
+              {}
               {job.skills && job.skills.length > 0 && (() => {
                 const hard = job.skills!.filter(s => s.type === 'hard')
                 const soft = job.skills!.filter(s => s.type === 'soft')
@@ -385,7 +385,7 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
                 )
               })()}
 
-              {/* Languages */}
+              {}
               {job.languages && job.languages.length > 0 && (
                 <div className="space-y-2">
                   <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">Languages</p>
@@ -400,7 +400,7 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
               )}
             </div>
 
-            {/* Sections (description) */}
+            {}
             {job.sections && job.sections.filter(s => s.description).length > 0 && (
               <div className="space-y-3">
                 <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">Description</p>
@@ -413,7 +413,7 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
               </div>
             )}
 
-            {/* Interview questions stored as metadatas */}
+            {}
             {(() => {
               const questions = (job.metadatas ?? [])
                 .filter(m => /^question_\d+$/.test(m.name))
@@ -496,7 +496,7 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
 
           {!loading && profiles.length > 0 && (
             <>
-              {/* Sort header — aligns with score badges on the right */}
+              {}
               <div className="flex items-center justify-end gap-2 pr-1">
                 {([
                   { field: 'match' as const, label: 'Matching', activeColor: 'text-brand' },

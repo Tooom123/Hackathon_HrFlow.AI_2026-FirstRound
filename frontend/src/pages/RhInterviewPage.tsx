@@ -54,7 +54,7 @@ function extractInterviewTurns(profile: Profile): InterviewTurn[] {
           score: parsed.s != null ? parseFloat(parsed.s) : null,
           evaluation: parsed.e ?? null,
         }
-      } catch { /* skip */ }
+      } catch {  }
       continue
     }
     const legacyMatch = m.name.match(/^interview_(question|answer|score|evaluation)_(\d+)$/)
@@ -117,12 +117,11 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
   const [tab, setTab] = useState<Tab>('interview')
   const [fullJob, setFullJob] = useState<JobCard>(job)
 
-  // Fetch full job (with skills) the first time the CV tab is opened
   useEffect(() => {
     if (tab !== 'profile') return
-    if (fullJob.skills !== undefined) return // already enriched
-    getJobDetail(job.key).then(setFullJob).catch(() => { /* keep partial job */ })
-  }, [tab]) // eslint-disable-line react-hooks/exhaustive-deps
+    if (fullJob.skills !== undefined) return
+    getJobDetail(job.key).then(setFullJob).catch(() => {  })
+  }, [tab])
 
   const fullName = [profile.info?.first_name, profile.info?.last_name].filter(Boolean).join(' ') || 'Candidat'
   const initials = ((profile.info?.first_name?.[0] ?? '') + (profile.info?.last_name?.[0] ?? '')).toUpperCase() || '?'
@@ -134,12 +133,10 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
     ? Math.round((matchScore + interviewPct) / 2)
     : null
 
-  // PDF attachment from HrFlow
   const cvUrl = profile.attachments?.find(a => a.file_url)?.file_url
     ?? profile.attachments?.find(a => a.public_url)?.public_url
     ?? null
 
-  // Skill matching for the "Profil CV" tab — uses fullJob which has skills from /job/indexing
   const jobSkillsNorm = new Set((fullJob.skills ?? []).map(s => normalizeSkill(s.name)))
   const profileSkills = profile.skills ?? []
 
@@ -154,7 +151,6 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
     })
   )
 
-  // Experience relevance — compare titles/companies against job name keywords
   const jobWords = new Set(fullJob.name.toLowerCase().split(/\s+/).filter(w => w.length > 3))
   const relevantExp = (profile.experiences ?? []).filter(exp => {
     const text = `${exp.title ?? ''} ${exp.company ?? ''}`.toLowerCase()
@@ -164,7 +160,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
 
   return (
     <div className="min-h-screen text-zinc-50 flex flex-col">
-      {/* Header */}
+      {}
       <header className="fixed inset-x-0 top-0 z-10 flex h-20 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/90 px-8 backdrop-blur-md">
         <Logo />
         <span className="text-xl font-bold text-brand hidden sm:block">Recruiter space</span>
@@ -180,7 +176,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
       </header>
 
       <main className="flex flex-col flex-1 pt-20">
-        {/* Candidate bar */}
+        {}
         <div className="border-b border-zinc-800/60 bg-zinc-900/40 px-8 py-4">
           <div className="mx-auto max-w-6xl flex items-center justify-between gap-6">
             <div className="flex items-center gap-4">
@@ -223,7 +219,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
           </div>
         </div>
 
-        {/* Tabs */}
+        {}
         <div className="border-b border-zinc-800/60 px-8">
           <div className="mx-auto max-w-6xl flex gap-1 pt-3">
             {([['interview', 'Interview'], ['profile', 'CV Profile']] as [Tab, string][]).map(([id, label]) => (
@@ -242,7 +238,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
           </div>
         </div>
 
-        {/* ── Tab: Entretien ── */}
+        {}
         {tab === 'interview' && (
           <div className="flex-1 overflow-y-auto px-4 py-8">
             <div className="mx-auto max-w-3xl space-y-6">
@@ -254,7 +250,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
 
               {turns.map((turn) => (
                 <div key={turn.index} className="space-y-3">
-                  {/* Question */}
+                  {}
                   <div className="flex items-start gap-3">
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand mt-0.5">
                       <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
@@ -271,7 +267,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
                     </div>
                   </div>
 
-                  {/* Answer */}
+                  {}
                   {turn.answer && (
                     <div className="flex items-start justify-end gap-3">
                       <div className="max-w-[75%] space-y-1">
@@ -310,12 +306,12 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
           </div>
         )}
 
-        {/* ── Tab: Profil CV ── */}
+        {}
         {tab === 'profile' && (
           <div className="flex-1 overflow-hidden">
             <div className="h-full grid grid-cols-1 lg:grid-cols-2">
 
-              {/* Left: PDF viewer */}
+              {}
               <div className="border-r border-zinc-800/60 flex flex-col">
                 <div className="px-5 py-3 border-b border-zinc-800/40">
                   <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Uploaded CV</p>
@@ -349,14 +345,14 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
                 </div>
               </div>
 
-              {/* Right: strong / weak points */}
+              {}
               <div className="overflow-y-auto px-6 py-6 space-y-5" style={{ maxHeight: 'calc(100vh - 180px)' }}>
                 <div>
                   <p className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-1">Profile analysis</p>
                   <p className="text-xs text-zinc-600">Explains the matching score ({matchScore !== null ? `${Math.round(matchScore)}%` : '–'})</p>
                 </div>
 
-                {/* Strengths */}
+                {}
                 <div className="rounded-2xl border border-brand/25 bg-brand/5 p-5 space-y-4">
                   <div className="flex items-center gap-2">
                     <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-brand shrink-0">
@@ -403,7 +399,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
                   )}
                 </div>
 
-                {/* Weaknesses */}
+                {}
                 <div className="rounded-2xl border border-red-900/30 bg-red-950/15 p-5 space-y-4">
                   <div className="flex items-center gap-2">
                     <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4 text-red-400 shrink-0">
@@ -453,7 +449,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
                   )}
                 </div>
 
-                {/* No job skills indexed — informational only, backend uses text-based scoring */}
+                {}
                 {jobSkillsNorm.size === 0 && (
                   <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 px-4 py-3">
                     <p className="text-xs text-zinc-500">

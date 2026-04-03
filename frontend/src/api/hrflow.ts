@@ -124,8 +124,6 @@ export async function saveQuestions(job_key: string, job_title: string, question
   }
 }
 
-// ── Interview session (recruiter creates, candidate joins) ──
-
 export interface CreateSessionResponse {
   session_id: string
   job_key: string
