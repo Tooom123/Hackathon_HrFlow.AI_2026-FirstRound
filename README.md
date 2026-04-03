@@ -57,7 +57,7 @@ VAD (Silero) -> STT (Whisper) -> LLM (Ollama) -> TTS (Edge-TTS) -> audio back to
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/your-org/firstround.git
+git clone git@github.com:Tooom123/Hackathon_HrFlow.AI_2026-FirstRound.git firstround
 cd firstround
 ```
 
