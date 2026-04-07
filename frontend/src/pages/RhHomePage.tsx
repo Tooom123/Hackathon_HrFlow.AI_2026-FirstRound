@@ -32,8 +32,8 @@ interface Props {
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <img src={poulpeLogo} alt="FirstRound" className="h-11 w-11 object-contain" />
-      <span className="text-xl font-bold tracking-tight text-zinc-100">
+      <img src={poulpeLogo} alt="FirstRound" className="h-14 w-14 object-contain" />
+      <span className="text-2xl font-extrabold tracking-tight text-zinc-100">
         First<span className="text-brand">Round</span>
       </span>
     </div>
@@ -59,8 +59,8 @@ function JobCardItem({
   onDismissNew: (e: React.MouseEvent) => void
   onClick: () => void
 }) {
-  const skills = job.skills?.slice(0, 3) ?? []
-  const hasMore = (job.skills?.length ?? 0) > 3
+  const skills = job.skills?.slice(0, 4) ?? []
+  const hasMore = (job.skills?.length ?? 0) > 4
   const date = job.updated_at ?? job.created_at
   const formattedDate = date
     ? new Date(date).toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })
@@ -69,10 +69,10 @@ function JobCardItem({
   return (
     <button
       onClick={onClick}
-      className={`group relative w-full overflow-hidden text-left rounded-2xl border p-4 transition-all active:scale-[0.98] ${
+      className={`group relative w-full overflow-hidden text-left rounded-2xl border p-5 transition-all duration-200 active:scale-[0.98] ${
         isArchived
           ? 'border-zinc-800/50 bg-zinc-900/40 opacity-60 hover:opacity-80 hover:border-zinc-700'
-          : 'border-zinc-800 hover:border-zinc-700'
+          : 'border-zinc-800 hover:border-brand/30 hover:shadow-[0_0_24px_rgba(61,210,190,0.08)]'
       }`}
       style={isArchived ? {} : {
         background: 'linear-gradient(135deg, rgba(39,39,42,0.95) 0%, rgba(24,24,27,0.98) 100%)',
@@ -82,11 +82,12 @@ function JobCardItem({
       {!isArchived && (
         <>
           <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-12 bg-gradient-to-b from-white/[0.03] to-transparent rounded-t-2xl" />
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-14 bg-gradient-to-b from-white/[0.03] to-transparent rounded-t-2xl" />
+          <div className="pointer-events-none absolute inset-y-0 left-0 w-0.5 rounded-full bg-brand/0 transition-all duration-200 group-hover:bg-brand/50" />
         </>
       )}
 
-      <div className="relative space-y-2.5">
+      <div className="relative space-y-3">
         <div className="flex items-start justify-between gap-2">
           <p className="text-sm font-semibold leading-snug text-zinc-100 group-hover:text-white line-clamp-2 flex-1">
             {job.name}
@@ -141,7 +142,7 @@ function JobCardItem({
         </div>
 
         {job.summary && (
-          <p className="text-xs leading-relaxed text-zinc-500 line-clamp-2">{job.summary}</p>
+          <p className="text-xs leading-relaxed text-zinc-500 line-clamp-3">{job.summary}</p>
         )}
 
         <div className="flex items-center justify-between gap-2">
@@ -149,7 +150,7 @@ function JobCardItem({
             {skills.map(s => <SkillBadge key={s.name} name={s.name} />)}
             {hasMore && (
               <span className="rounded-md bg-zinc-800 px-2 py-0.5 text-[11px] font-medium text-zinc-600">
-                +{(job.skills?.length ?? 0) - 3}
+                +{(job.skills?.length ?? 0) - 4}
               </span>
             )}
           </div>
@@ -374,28 +375,19 @@ export default function RhHomePage({ recentJob, onNewSession, onOpenJob }: Props
 
   return (
     <div className="min-h-screen text-zinc-50">
-      <header className="fixed inset-x-0 top-0 z-10 flex h-28 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/80 px-10 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-10 flex h-24 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/80 px-10 backdrop-blur-md relative">
         <Logo />
-        <div className="flex items-center gap-2">
-          <span className="text-xl font-bold text-brand hidden sm:block">Recruiter space</span>
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-2.5">
+          <span className="text-lg font-semibold text-zinc-100 hidden sm:block">Recruiter space</span>
           {totalNew > 0 && (
-            <span className="rounded-full bg-amber-500 px-2 py-0.5 text-[11px] font-bold text-zinc-950 leading-none">
-              +{totalNew}
+            <span className="rounded-full bg-amber-500 px-2.5 py-0.5 text-[11px] font-bold text-zinc-950 leading-none">
+              +{totalNew} new
             </span>
           )}
         </div>
-        <button
-          onClick={onNewSession}
-          className="flex items-center gap-2.5 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-zinc-950 transition-all hover:bg-brand-dim active:scale-[0.99]"
-        >
-          <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
-            <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-          </svg>
-          New session
-        </button>
       </header>
 
-      <main className="flex min-h-screen items-start justify-center px-8 pb-16 pt-40">
+      <main className="flex min-h-screen items-start justify-center px-8 pb-28 pt-36">
         <div className="w-full max-w-6xl space-y-5">
 
           <div className="flex items-end justify-between gap-4 flex-wrap">
@@ -536,6 +528,16 @@ export default function RhHomePage({ recentJob, onNewSession, onOpenJob }: Props
       {sortOpen && (
         <div className="fixed inset-0 z-10" onClick={() => setSortOpen(false)} />
       )}
+
+      <button
+        onClick={onNewSession}
+        className="fixed bottom-8 right-8 z-30 flex items-center gap-2.5 rounded-2xl bg-brand px-6 py-3.5 text-sm font-bold text-zinc-950 shadow-2xl shadow-brand/30 transition-all hover:bg-brand-dim hover:scale-105 active:scale-[0.98]"
+      >
+        <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+          <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
+        New session
+      </button>
     </div>
   )
 }

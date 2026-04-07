@@ -55,9 +55,9 @@ export default function RhSetupPage({ onBack, onComplete }: Props) {
 
           <button
             onClick={onBack}
-            className="fixed left-6 top-20 flex items-center gap-1.5 text-xs text-zinc-100 transition-colors hover:text-white z-20"
+            className="fixed left-6 top-20 flex items-center gap-2 text-sm font-medium text-zinc-100 transition-colors hover:text-white z-20"
           >
-            <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
+            <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
               <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
             </svg>
             Back

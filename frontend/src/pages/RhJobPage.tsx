@@ -11,8 +11,8 @@ interface Props {
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <img src={poulpeLogo} alt="FirstRound" className="h-11 w-11 object-contain" />
-      <span className="text-xl font-bold tracking-tight text-zinc-100">
+      <img src={poulpeLogo} alt="FirstRound" className="h-14 w-14 object-contain" />
+      <span className="text-2xl font-extrabold tracking-tight text-zinc-100">
         First<span className="text-brand">Round</span>
       </span>
     </div>
@@ -250,50 +250,24 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
 
   return (
     <div className="min-h-screen text-zinc-50">
-      <header className="fixed inset-x-0 top-0 z-10 flex h-28 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/80 px-10 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-10 flex h-24 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/80 px-10 backdrop-blur-md">
         <Logo />
-        <span className="text-xl font-bold text-brand hidden sm:block">Recruiter space</span>
-        <div className="flex items-center gap-3">
-          {linkState !== 'ready' && (
-            <button
-              onClick={handleCreateLink}
-              disabled={linkState === 'creating'}
-              className="flex items-center gap-2 rounded-xl bg-brand px-5 py-3 text-sm font-semibold text-zinc-950 transition-all hover:bg-brand-dim active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {linkState === 'creating' ? (
-                <>
-                  <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-                  </svg>
-                  Loading…
-                </>
-              ) : (
-                <>
-                  <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
-                    <path d="M6.5 9.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                    <path d="M9.5 6.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-                  </svg>
-                  Create candidate link
-                </>
-              )}
-            </button>
-          )}
-        </div>
+        <span className="absolute left-1/2 -translate-x-1/2 text-lg font-semibold text-zinc-100 hidden sm:block">Recruiter space</span>
+        <div />
       </header>
 
-      <main className="flex min-h-screen items-start justify-center px-8 pb-16 pt-40">
-        <div className="w-full max-w-6xl space-y-6">
+      <button
+        onClick={onBack}
+        className="fixed left-6 top-[6.5rem] flex items-center gap-2 text-sm font-medium text-zinc-100 transition-colors hover:text-white z-20"
+      >
+        <svg viewBox="0 0 16 16" fill="none" className="h-5 w-5">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Back
+      </button>
 
-          <button
-            onClick={onBack}
-            className="fixed left-6 top-32 flex items-center gap-1.5 text-xs text-zinc-100 transition-colors hover:text-white z-20"
-          >
-            <svg viewBox="0 0 16 16" fill="none" className="h-3.5 w-3.5">
-              <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-            Back
-          </button>
+      <main className="flex min-h-screen items-start justify-center px-8 pb-28 pt-36">
+        <div className="w-full max-w-6xl space-y-6">
 
           <div className="rounded-2xl border border-zinc-800 p-6 space-y-5"
             style={{ background: 'linear-gradient(135deg, rgba(39,39,42,0.7) 0%, rgba(24,24,27,0.85) 100%)' }}>
@@ -313,7 +287,7 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
                 )}
                 {job.created_at && (
                   <span className="text-xs text-zinc-600">
-                    Créé le {new Date(job.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                    Created on {new Date(job.created_at).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
                   </span>
                 )}
                 <span className="rounded-full bg-brand/10 px-2.5 py-0.5 text-xs font-semibold text-brand">
@@ -413,26 +387,6 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
               </div>
             )}
 
-            {}
-            {(() => {
-              const questions = (job.metadatas ?? [])
-                .filter(m => /^question_\d+$/.test(m.name))
-                .sort((a, b) => parseInt(a.name.split('_')[1]) - parseInt(b.name.split('_')[1]))
-              if (!questions.length) return null
-              return (
-                <div className="space-y-2">
-                  <p className="text-xs font-semibold uppercase tracking-wider text-zinc-600">Interview questions</p>
-                  <ol className="space-y-1.5 list-none">
-                    {questions.map((q, i) => (
-                      <li key={i} className="flex items-start gap-2">
-                        <span className="mt-0.5 flex h-4 w-4 shrink-0 items-center justify-center rounded-full bg-brand/10 text-[10px] font-bold text-brand">{i + 1}</span>
-                        <span className="text-sm text-zinc-400">{q.value}</span>
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              )
-            })()}
           </div>
 
           {linkState === 'ready' && candidateLink && (
@@ -558,6 +512,32 @@ export default function RhJobPage({ job, onBack, onOpenProfile }: Props) {
 
         </div>
       </main>
+
+      {linkState !== 'ready' && (
+        <button
+          onClick={handleCreateLink}
+          disabled={linkState === 'creating'}
+          className="fixed bottom-8 right-8 z-30 flex items-center gap-2.5 rounded-2xl bg-brand px-6 py-3.5 text-sm font-bold text-zinc-950 shadow-2xl shadow-brand/30 transition-all hover:bg-brand-dim hover:scale-105 active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:scale-100"
+        >
+          {linkState === 'creating' ? (
+            <>
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
+              </svg>
+              Loading…
+            </>
+          ) : (
+            <>
+              <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+                <path d="M6.5 9.5a3.5 3.5 0 0 0 5 0l2-2a3.5 3.5 0 0 0-5-5l-1 1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+                <path d="M9.5 6.5a3.5 3.5 0 0 0-5 0l-2 2a3.5 3.5 0 0 0 5 5l1-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+              </svg>
+              Create candidate link
+            </>
+          )}
+        </button>
+      )}
     </div>
   )
 }

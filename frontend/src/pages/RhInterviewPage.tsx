@@ -23,8 +23,8 @@ type Tab = 'interview' | 'profile'
 function Logo() {
   return (
     <div className="flex items-center gap-3">
-      <img src={poulpeLogo} alt="FirstRound" className="h-11 w-11 object-contain" />
-      <span className="text-xl font-bold tracking-tight text-zinc-100">
+      <img src={poulpeLogo} alt="FirstRound" className="h-14 w-14 object-contain" />
+      <span className="text-2xl font-extrabold tracking-tight text-zinc-100">
         First<span className="text-brand">Round</span>
       </span>
     </div>
@@ -161,21 +161,23 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
   return (
     <div className="min-h-screen text-zinc-50 flex flex-col">
       {}
-      <header className="fixed inset-x-0 top-0 z-10 flex h-20 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/90 px-8 backdrop-blur-md">
+      <header className="fixed inset-x-0 top-0 z-10 flex h-24 items-center justify-between border-b border-zinc-800/60 bg-zinc-950/90 px-10 backdrop-blur-md">
         <Logo />
-        <span className="text-xl font-bold text-brand hidden sm:block">Recruiter space</span>
-        <button
-          onClick={onBack}
-          className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-2.5 text-sm font-semibold text-zinc-300 transition-all hover:border-zinc-700 hover:text-zinc-100"
-        >
-          <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
-            <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-          Back
-        </button>
+        <span className="absolute left-1/2 -translate-x-1/2 text-lg font-semibold text-zinc-100 hidden sm:block">Recruiter space</span>
+        <div />
       </header>
 
-      <main className="flex flex-col flex-1 pt-20">
+      <button
+        onClick={onBack}
+        className="fixed left-6 top-[6.5rem] flex items-center gap-2 text-sm font-medium text-zinc-100 transition-colors hover:text-white z-20"
+      >
+        <svg viewBox="0 0 16 16" fill="none" className="h-5 w-5">
+          <path d="M10 3L5 8l5 5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        Back
+      </button>
+
+      <main className="flex flex-col flex-1 pt-24">
         {}
         <div className="border-b border-zinc-800/60 bg-zinc-900/40 px-8 py-4">
           <div className="mx-auto max-w-6xl flex items-center justify-between gap-6">
@@ -241,7 +243,7 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
         {}
         {tab === 'interview' && (
           <div className="flex-1 overflow-y-auto px-4 py-8">
-            <div className="mx-auto max-w-3xl space-y-6">
+            <div className="mx-auto max-w-5xl space-y-6">
               {!hasInterview && (
                 <div className="rounded-2xl border border-dashed border-zinc-800 px-4 py-12 text-center">
                   <p className="text-sm text-zinc-600">No interview recorded for this candidate.</p>
@@ -252,16 +254,16 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
                 <div key={turn.index} className="space-y-3">
                   {}
                   <div className="flex items-start gap-3">
-                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-brand mt-0.5">
-                      <svg viewBox="0 0 16 16" fill="none" className="h-4 w-4">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand mt-0.5">
+                      <svg viewBox="0 0 16 16" fill="none" className="h-5 w-5">
                         <circle cx="8" cy="8" r="5.5" stroke="white" strokeWidth="1.4" />
                         <path d="M8 5v3.5l2 1.5" stroke="white" strokeWidth="1.4" strokeLinecap="round" />
                       </svg>
                     </div>
-                    <div className="max-w-[75%] space-y-1">
-                      <p className="text-[11px] font-semibold text-brand">FirstRound</p>
-                      <div className="rounded-2xl rounded-tl-sm bg-zinc-800 px-4 py-3">
-                        <p className="text-sm leading-relaxed text-zinc-200">{turn.question}</p>
+                    <div className="max-w-[80%] space-y-1">
+                      <p className="text-xs font-semibold text-brand">FirstRound</p>
+                      <div className="rounded-2xl rounded-tl-sm bg-brand/10 border border-brand/20 px-5 py-3.5">
+                        <p className="text-base leading-relaxed text-zinc-100">{turn.question}</p>
                       </div>
                       <p className="text-[10px] text-zinc-700 pl-1">Question {turn.index + 1}</p>
                     </div>
@@ -270,13 +272,13 @@ export default function RhInterviewPage({ job, profile, matchScore, onBack }: Pr
                   {}
                   {turn.answer && (
                     <div className="flex items-start justify-end gap-3">
-                      <div className="max-w-[75%] space-y-1">
-                        <p className="text-[11px] font-semibold text-zinc-400 text-right">{fullName}</p>
+                      <div className="max-w-[80%] space-y-1">
+                        <p className="text-xs font-semibold text-zinc-400 text-right">{fullName}</p>
                         <div
-                          className="rounded-2xl rounded-tr-sm px-4 py-3"
+                          className="rounded-2xl rounded-tr-sm px-5 py-3.5"
                           style={{ background: 'linear-gradient(135deg, rgba(39,39,42,0.95) 0%, rgba(24,24,27,0.98) 100%)', border: '1px solid rgba(63,63,70,0.8)' }}
                         >
-                          <p className="text-sm leading-relaxed text-zinc-100">{turn.answer}</p>
+                          <p className="text-base leading-relaxed text-zinc-100">{turn.answer}</p>
                         </div>
                         <div className="flex items-start justify-end gap-2 pt-0.5">
                           {turn.evaluation && (
