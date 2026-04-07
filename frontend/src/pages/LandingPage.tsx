@@ -75,20 +75,20 @@ export default function LandingPage() {
         }}
       />
 
-      <nav className="relative z-20 flex items-center justify-between px-8 py-4 max-w-6xl mx-auto">
+      <nav className="relative z-20 flex items-center justify-between px-10 py-5 max-w-6xl mx-auto">
         <div className="flex items-center gap-3">
-          <img src={poulpeLogo} alt="FirstRound" className="w-14 h-14 object-contain" />
-          <span className="text-2xl font-extrabold tracking-tight">
+          <img src={poulpeLogo} alt="FirstRound" className="w-16 h-16 object-contain" />
+          <span className="text-3xl font-extrabold tracking-tight">
             First<span className="text-brand">Round</span>
           </span>
         </div>
-        <div className="hidden gap-8 text-sm text-zinc-400 sm:flex">
+        <div className="hidden gap-8 text-base text-zinc-400 sm:flex">
           <a href="#how" className="hover:text-zinc-100 transition-colors">How it works</a>
           <a href="#pricing" className="hover:text-zinc-100 transition-colors">Pricing</a>
         </div>
         <button
           onClick={() => navigate('/app')}
-          className="rounded-xl bg-brand px-5 py-2 text-sm font-bold text-zinc-950 hover:bg-brand-dim transition-all hover:scale-105 active:scale-100 shadow-lg shadow-brand/20"
+          className="rounded-xl bg-brand px-6 py-2.5 text-base font-bold text-zinc-950 hover:bg-brand-dim transition-all hover:scale-105 active:scale-100 shadow-lg shadow-brand/20"
         >
           Try the free demo →
         </button>
@@ -96,22 +96,22 @@ export default function LandingPage() {
 
       <div className="relative z-10 w-full">
 
-        <div className="hidden lg:block absolute z-20" style={{ left: '4rem', top: '7rem' }}>
+        <div className="hidden lg:block absolute z-20" style={{ left: '7rem', top: '7rem' }}>
           <div className="relative">
             <div aria-hidden className="absolute inset-0 rounded-2xl blur-xl" style={{ background: 'rgba(61,210,190,0.25)', transform: 'scale(1.3)' }} />
-            <div className="relative rounded-2xl border border-brand/25 bg-zinc-900/85 backdrop-blur-md px-5 py-4 shadow-2xl shadow-black/50 rotate-[-3deg]">
-              <p className="text-2xl font-extrabold text-brand leading-none">× 5</p>
-              <p className="text-[11px] text-zinc-400 leading-tight mt-1">time saved on<br />pre-screening</p>
+            <div className="relative rounded-2xl border border-brand/25 bg-zinc-900/85 backdrop-blur-md px-8 py-6 shadow-2xl shadow-black/50 rotate-[-3deg]">
+              <p className="text-4xl font-extrabold text-brand leading-none">× 5</p>
+              <p className="text-[14px] text-zinc-400 leading-tight mt-2">time saved on<br />pre-screening</p>
             </div>
           </div>
         </div>
 
-        <div className="hidden lg:block absolute z-20" style={{ right: '7rem', top: '14rem' }}>
+        <div className="hidden lg:block absolute z-20" style={{ right: '7rem', top: '18rem' }}>
           <div className="relative">
             <div aria-hidden className="absolute inset-0 rounded-2xl blur-xl" style={{ background: 'rgba(61,210,190,0.25)', transform: 'scale(1.3)' }} />
-            <div className="relative rounded-2xl border border-brand/25 bg-zinc-900/85 backdrop-blur-md px-5 py-4 shadow-2xl shadow-black/50 rotate-[2deg]">
-              <p className="text-2xl font-extrabold text-brand leading-none">94%</p>
-              <p className="text-[11px] text-zinc-400 leading-tight mt-1">of candidates complete<br />their interview</p>
+            <div className="relative rounded-2xl border border-brand/25 bg-zinc-900/85 backdrop-blur-md px-8 py-6 shadow-2xl shadow-black/50 rotate-[2deg]">
+              <p className="text-4xl font-extrabold text-brand leading-none">94%</p>
+              <p className="text-[14px] text-zinc-400 leading-tight mt-2">of candidates complete<br />their interview</p>
             </div>
           </div>
         </div>
